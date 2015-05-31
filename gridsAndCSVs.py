@@ -50,9 +50,9 @@ def addEventsToGrid(gridSquares, handles):
 	"""add one to the grid square's appropriate feature vector every time we read
 	one that is in that lil grid zone"""
 	i = 0
-	labels = {}
+	labels = []
 	for handle in handles:
-		labels[handle[:-4]] = i
+		labels.append(handle[:-4])
 		with open(handle) as csvfile:
 			spamreader = csv.reader(csvfile, delimiter=',', quotechar='|')
 			for row in spamreader:	
@@ -69,8 +69,15 @@ def addEventsToGrid(gridSquares, handles):
 	return labels
 
 
-# def writeOutputCSV():
-# 	filenameDest = "output.csv"
+def writeOutputCSV(gridSquares, labels):
+	filenameDest = "output.csv"
+	with open(filenameDest, 'wb') as csvfile:
+		spamwriter = csv.writer(csvfile, delimiter=',',quotechar='|', quoting=csv.QUOTE_MINIMAL)
+		spamwriter.writerow(["id", "longitude", "latitude"] + labels)
+		for i in gridSquares:
+			for j in i:
+				rowToWrite = [j.id, j.longitudeNW, j.latitudeNW] + j.featureVector.tolist()
+				spamwriter.writerow(rowToWrite)
 
 
 if __name__ == "__main__":
@@ -87,8 +94,9 @@ if __name__ == "__main__":
 	#call something with the handles
 	gridSquares = makeGridSquares(numWide, numTall, len(handles))
 	# whichGridId(gridSquares,47.634145, -122.359696)
-	addEventsToGrid(gridSquares,handles)
+	labels = addEventsToGrid(gridSquares,handles)
 
 	# for i in gridSquares:
 	# 	for j in i:
 	# 		print j
+	writeOutputCSV(gridSquares, labels)
