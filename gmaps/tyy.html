@@ -1,0 +1,129 @@
+
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+     <title>Bing Map Demo</title>
+        
+     <script src="Scripts/jquery-2.0.3.min.js" type="text/javascript"></script>
+     <script  type="text/javascript" src="http://ecn.dev.virtualearth.net/mapcontrol/mapcontrol.ashx?v=7.0"> </script>
+
+    <script type="text/javascript">
+        var gTheMap;
+        var gMarker1;
+        var gMarker2;
+
+        $(document).ready(DocLoaded);
+
+        function DocLoaded()
+        {
+            // golf course coordinates
+            var StartLat = 44.924254;
+            var StartLng = -93.366859;
+
+            // what element to display the map in
+            var mapdiv = $("#map_div")[0];
+
+            // where on earth the map should display
+            var StartPoint = new  Microsoft.Maps.Location(StartLat, StartLng);
+
+            // create the map
+            gTheMap = new Microsoft.Maps.Map(mapdiv,
+                {
+                    credentials: 'Asbsa_hzfHl69XF3wxBd_WbW0dLNTRUH3ZHQG9qcV5EFRLuWEaOP1hjWdZ0A0P17',
+                    center: StartPoint,
+                    zoom: 18,
+                    mapTypeId: Microsoft.Maps.MapTypeId.aerial
+                });
+
+
+            // place two markers
+            marker1 = PlaceMarker(new Microsoft.Maps.Location(StartLat, StartLng + .0001));
+            marker2 = PlaceMarker(new Microsoft.Maps.Location(StartLat, StartLng - .0001));
+
+            DragEnd(null);
+        }
+
+        // ---- PlaceMarker ------------------------------------
+
+        function PlaceMarker(location)
+        {
+            var marker = new Microsoft.Maps.Pushpin(location,
+            {
+                draggable : true
+            });
+            Microsoft.Maps.Events.addHandler(marker, 'dragend', DragEnd);
+            gTheMap.entities.push(marker);
+            return marker;
+        }
+
+        // ---- DragEnd -------------------------------------------
+
+        var gLine = null;
+
+        function DragEnd(Args)
+        {
+           var Distance =  CalculateDistance(marker1._location, marker2._location);
+
+           $("#message").text(Distance.toFixed(1) + ' yards');
+            
+           // draw a line connecting the points
+           var Endpoints = [marker1._location, marker2._location];      
+
+           if (gLine == null)
+           {
+               gLine = new Microsoft.Maps.Polyline(Endpoints, 
+                   {
+                       strokeColor: new Microsoft.Maps.Color(0xFF, 0xFF, 0xFF, 0),  // aRGB
+                       strokeThickness : 2
+                   });
+
+               gTheMap.entities.push(gLine);
+           }
+           else
+               gLine.setLocations(Endpoints);
+         }
+
+        // ---- CalculateDistance ------------------------------------
+        //
+        // return Yards between two points
+
+        function CalculateDistance(Position1, Position2)
+        {
+            var lat1 = Position1.latitude;
+            var lat2 = Position2.latitude;
+            var lon1 = Position1.longitude;
+            var lon2 = Position2.longitude;
+
+            var EarthRadius = 6371; // km
+            var dLat = ToRadian(lat2 - lat1);
+            var dLon = ToRadian(lon2 - lon1);
+            var lat1 = ToRadian(lat1);
+            var lat2 = ToRadian(lat2);
+
+            var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                    Math.sin(dLon / 2) * Math.sin(dLon / 2) * Math.cos(lat1) * Math.cos(lat2);
+            var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+            var Kmeters = EarthRadius * c;
+            var yards = Kmeters * 1000 * 1.0936133;
+            return yards;
+        }
+
+        // ---- ToRadian -----------------------
+        //
+        // input degrees, output radians
+        function ToRadian(Value)
+        {          
+            return Value * Math.PI / 180;
+        }
+    </script>
+    </head>  
+<body>  
+    <div id="map_div" style="width: 100%; height: 100%; "> </div> 
+    <span style="position:absolute; top:0px; right:6em; width: 6em; z-index:100;
+        text-align:center; background-color: yellow" id="message"></span>
+    <span style="position: absolute; top: 0px; right:2em; width:4em; background-color: yellow; text-align: center;" >
+        <a href="http://weblogs.asp.net/stevewellens/archive/2012/12/09/google-and-bing-map-apis-compared.aspx" target="_blank">BLOG</a></span>
+
+</body>
+</html>

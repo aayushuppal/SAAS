@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Place searches</title>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
+
+<style>
+  html, body, #map-canvas {
+    height: 100%;
+    margin: 0px;
+    padding: 0px
+  }
+</style>
+
+<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&signed_in=true&libraries=places"></script>
+
+<script>
+  var map;
+  var infowindow;
+  var tempstring =""
+
+  function initialize() {
+    start_lat = -33.8665433-2
+    start_long = 151.1956316-2
+    end_lat = -33.8665433+2
+    end_long = 151.1956316+2
+    xx = (start_lat+end_lat)/2
+    yy = (start_long+end_long)/2
+    var pyrmont = new google.maps.LatLng((xx), yy);
+
+
+    
+
+    map = new google.maps.Map(document.getElementById('map-canvas'), {
+      center: pyrmont,
+      zoom: 15
+    });
+
+    var request = {
+      location: pyrmont,
+      radius: 1000,
+      types: ['food', 'store', 'gym', 'clothing_store', 'subway_station', 'convenience_store']
+    };
+
+    infowindow = new google.maps.InfoWindow();
+    var service = new google.maps.places.PlacesService(map);
+    service.nearbySearch(request, callback);
+    
+    
+
+  }
+
+  function callback(results, status) {
+    if (status == google.maps.places.PlacesServiceStatus.OK) {
+      for (var i = 0; i < results.length; i++) {
+        createMarker(results[i]);
+      }
+    }
+
+    var hiddenElement = document.createElement('a');
+    hiddenElement.href = 'data:attachment/text,' + encodeURI(tempstring);
+    hiddenElement.target = '_blank';
+    hiddenElement.download = 'myFile.txt';
+    hiddenElement.click();
+
+  }
+
+  function createMarker(place) {
+    var placeLoc = place.geometry.location;
+    //alert(placeLoc);
+    tempstring = tempstring+"~"+placeLoc;
+    
+    var marker = new google.maps.Marker({
+      map: map,
+      position: place.geometry.location
+
+    });
+
+    google.maps.event.addListener(marker, 'click', function() {
+      infowindow.setContent(place.name);
+      infowindow.open(map, this);
+    });
+  }
+
+
+
+  google.maps.event.addDomListener(window, 'load', initialize);
+</script>
+
+  </head>
+  
+  <body>
+    <div id="map-canvas"></div>
+  </body>
+
+</html>
