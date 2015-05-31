@@ -71,9 +71,12 @@
     //alert(placeLoc);
     tempstring = tempstring+"~"+placeLoc;
     
+    var imagez = 'http://png-5.findicons.com/files/icons/1588/farm_fresh_web/32/flag_red.png';
+    var grnimgz = 'http://openmediart.com/log/wp-content/themes/studiozen/images/shortcode_icons/green/flag.png';
     var marker = new google.maps.Marker({
       map: map,
-      position: place.geometry.location
+      position: place.geometry.location,
+      icon: grnimgz
 
     });
 
